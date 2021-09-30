@@ -29,7 +29,7 @@ public class SendMessageController {
     ) {
         log.info("Payload : {}", messagePayload);
         Message message = messagePayload.toMessage();
-        rabbitSenderService.produceMessageWithType(message);
+        rabbitSenderService.produceMessage(message);
         log.info("Message Send: {}", message);
         return new ResponseEntity<>(HttpStatus.OK);
     }
