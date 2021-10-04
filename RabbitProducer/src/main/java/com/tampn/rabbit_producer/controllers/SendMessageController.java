@@ -1,6 +1,5 @@
 package com.tampn.rabbit_producer.controllers;
 
-import com.tampn.rabbit_producer.entities.Message;
 import com.tampn.rabbit_producer.payloads.MessagePayload;
 import com.tampn.rabbit_producer.services.RabbitSenderService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +22,12 @@ public class SendMessageController {
         this.rabbitSenderService = rabbitSenderService;
     }
 
-    @PostMapping(value = "/producer")
+    @PostMapping(value = "/producer/message")
     public ResponseEntity<Void> produceMessage(
             @RequestBody MessagePayload messagePayload
     ) {
-        log.info("Payload : {}", messagePayload);
-        Message message = messagePayload.toMessage();
-        rabbitSenderService.produceMessage(message);
-        log.info("Message Send: {}", message);
+        log.info("Message : {}", messagePayload);
+        rabbitSenderService.publishMsg(messagePayload.getMessage());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

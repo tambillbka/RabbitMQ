@@ -15,10 +15,9 @@ import java.sql.Timestamp;
 @ToString
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.UUIDGenerator.class,
-        scope = Message.class
+        scope = MessageChat.class
 )
-public class Message {
+public class MessageChat {
     private String content;
     private Timestamp sendTime;
-    private MessageType messageType;
 }

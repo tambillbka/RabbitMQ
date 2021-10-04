@@ -9,6 +9,7 @@ import java.util.Optional;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Strings {
     public static final String EMPTY = "";
+    public static final String RETRY_COUNT = "RETRY_COUNT";
 
     public static String refactor(String inVal) {
         return Optional.ofNullable(inVal).map(Strings::trimAllWhiteSpace).orElse(EMPTY);
