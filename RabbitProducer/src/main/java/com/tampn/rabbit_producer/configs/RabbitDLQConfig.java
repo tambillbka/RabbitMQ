@@ -1,10 +1,10 @@
 package com.tampn.rabbit_producer.configs;
 
 import com.tampn.rabbit_producer.configs.annotations.DeadMessage;
+import com.tampn.rabbit_producer.configs.annotations.RabbitMessage;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.core.ExchangeBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,14 +24,6 @@ public class RabbitDLQConfig {
 
     @Bean
     @DeadMessage
-    Exchange dlqExchange() {
-        return ExchangeBuilder
-                .directExchange(exchange)
-                .build();
-    }
-
-    @Bean
-    @DeadMessage
     Queue dlqQueue() {
         return QueueBuilder
                 .durable(dlqQueue)
@@ -42,7 +34,7 @@ public class RabbitDLQConfig {
     @Bean
     @DeadMessage
     Binding bindingBuilder(
-            @DeadMessage Exchange exchange,
+            @RabbitMessage Exchange exchange,
             @DeadMessage Queue queue
     ) {
         return BindingBuilder

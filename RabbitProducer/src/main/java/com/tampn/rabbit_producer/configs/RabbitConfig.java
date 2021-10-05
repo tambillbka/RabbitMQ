@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabbitMQConfig {
+public class RabbitConfig {
 
     @Value("${tampn.rabbitmq.exchange}")
     String exchange;
@@ -32,6 +32,9 @@ public class RabbitMQConfig {
     @Value("${tampn.rabbit.msg.maxlength}")
     int maxLength;
 
+    @Value("${tampn.rabbitmq.ttl}")
+    int timeToLive;
+
     @Bean
     @RabbitMessage
     Exchange exchange() {
@@ -46,6 +49,7 @@ public class RabbitMQConfig {
         return QueueBuilder
                 .durable(msgQueue)
                 .maxLength(maxLength)
+                .ttl(timeToLive)
                 .deadLetterExchange(exchange)
                 .deadLetterRoutingKey(dlqQueue)
                 .build();
@@ -67,6 +71,7 @@ public class RabbitMQConfig {
         return QueueBuilder
                 .durable(notifyQueue)
                 .maxLength(maxLength)
+                .ttl(timeToLive)
                 .deadLetterExchange(exchange)
                 .deadLetterRoutingKey(dlqQueue)
                 .build();
@@ -88,6 +93,7 @@ public class RabbitMQConfig {
         return QueueBuilder
                 .durable(newsQueue)
                 .maxLength(maxLength)
+                .ttl(timeToLive)
                 .deadLetterExchange(exchange)
                 .deadLetterRoutingKey(dlqQueue)
                 .build();

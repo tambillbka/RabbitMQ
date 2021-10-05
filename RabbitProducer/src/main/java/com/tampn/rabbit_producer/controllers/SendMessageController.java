@@ -30,4 +30,10 @@ public class SendMessageController {
         rabbitSenderService.publishMsg(messagePayload.getMessage());
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping(value = "/producer/faker")
+    public ResponseEntity<Void> produceMessage() {
+        rabbitSenderService.fakeData();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

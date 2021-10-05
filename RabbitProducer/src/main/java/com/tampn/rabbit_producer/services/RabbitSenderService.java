@@ -34,58 +34,41 @@ public class RabbitSenderService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void publish(Object obj, QueueOption option) {
+    public void publish(Message message, String queue) {
+        rabbitTemplate.convertAndSend(exchange, queue, message);
+    }
+
+    public void publish(Object obj, String queue) {
         Message message = MessageBuilder
                 .withBody(Helpers.toByteArray(obj))
                 .setMessageId(UUID.randomUUID().toString())
                 .setHeader(RETRY_COUNT, 0)
                 .build();
-
-        switch (option) {
-            case NEWS:
-                rabbitTemplate.convertAndSend(exchange, newsQueue, message);
-                break;
-
-            case NOTIFICATION:
-                rabbitTemplate.convertAndSend(exchange, notifyQueue, message);
-                break;
-
-            case MESSAGE:
-            default:
-                rabbitTemplate.convertAndSend(exchange, msgQueue, message);
-                break;
-        }
+        this.publish(message, queue);
     }
 
     public void publishMsg(String message) {
         message = Strings.refactor(message);
-        this.publish(message, QueueOption.MESSAGE);
+        this.publish(message, msgQueue);
+    }
 
-        Flux.range(0, 12)
+    public void fakeData() {
+        this.fake(msgQueue, 15);
+        this.fake(notifyQueue, 15);
+        this.fake(newsQueue, 15);
+    }
+
+    public void fake(String queue, int maxInsert) {
+        String errorMsg = "[### RabbitSenderService ###] - Fake data in queue {}, Error with: {}";
+        String successMsg = "[### RabbitSenderService ###] - Sent success {} message to queue - {}";
+
+        Flux.range(0, maxInsert)
                 .doOnNext(consumer -> {
                     String messageId = UUID.randomUUID().toString();
-                    this.publish(messageId, QueueOption.MESSAGE);
+                    this.publish(messageId, queue);
                 })
-                .doOnError(err -> log.error("Has an Error!"))
-                .doOnComplete(() -> log.info("Complete!"))
-                .subscribe();
-
-        Flux.range(0, 12)
-                .doOnNext(consumer -> {
-                    String messageId = UUID.randomUUID().toString();
-                    this.publish(messageId, QueueOption.NOTIFICATION);
-                })
-                .doOnError(err -> log.error("Has an Error!"))
-                .doOnComplete(() -> log.info("Complete!"))
-                .subscribe();
-
-        Flux.range(0, 20)
-                .doOnNext(consumer -> {
-                    String messageId = UUID.randomUUID().toString();
-                    this.publish(messageId, QueueOption.NEWS);
-                })
-                .doOnError(err -> log.error("Has an Error!"))
-                .doOnComplete(() -> log.info("Complete!"))
+                .doOnError(err -> log.error(errorMsg, queue, err.getMessage()))
+                .doOnComplete(() -> log.info(successMsg, maxInsert, queue))
                 .subscribe();
     }
 
