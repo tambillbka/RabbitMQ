@@ -5,6 +5,7 @@ import com.tampn.rabbit_producer.common.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,8 +35,23 @@ public class RabbitSenderService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
+    final RabbitTemplate.ConfirmCallback confirmCallback = (correlationData, ack, cause) -> {
+        assert correlationData != null;
+        String messageId = correlationData.getId();
+        if (ack) {
+            log.info("[### RabbitSenderService ###] Sent message {} success!", messageId);
+        } else {
+            log.error("[### RabbitSenderService ###] Error sent message {}", messageId);
+        }
+    };
+
     public void publish(Message message, String queue) {
-        rabbitTemplate.convertAndSend(exchange, queue, message);
+        // Setting confirm call back
+        rabbitTemplate.setConfirmCallback(confirmCallback);
+
+        //Sent message template
+        CorrelationData correlationData = new CorrelationData(message.getMessageProperties().getMessageId());
+        rabbitTemplate.convertAndSend(exchange, queue, message, correlationData);
     }
 
     public void publish(Object obj, String queue) {
